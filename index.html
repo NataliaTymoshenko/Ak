@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ретуш зображень у Photopea | Урок для 10 класу</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --accent: #f59e0b;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Анімований фон */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .bg-animation span {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 50%;
+            animation: float 20s infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+        
+        /* Навігація */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 50px;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .logo {
+            font-size: 1.5em;
+            font-weight: 800;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .progress-bar {
+            width: 300px;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        /* Секції */
+        section {
+            min-height: 100vh;
+            padding: 100px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease;
+        }
+        
+        section.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        h1 {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #fff, var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        h2 {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: var(--primary);
+        }
+        
+        h3 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: var(--accent);
+        }
+        
+        /* Герой секція */
+        .hero {
+            text-align: center;
+        }
+        
+        .hero p {
+            font-size: 1.3em;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 40px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .start-btn {
+            display: inline-block;
+            padding: 20px 50px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+            cursor: pointer;
+            border: none;
+        }
+        
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.6);
+        }
+        
+        /* Картки запитань */
+        .questions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+        
+        .question-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .question-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.3);
+        }
+        
+        .question-card.active {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: var(--primary);
+        }
+        
+        .question-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        
+        .question-card h4 {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+        
+        .question-card p {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+        
+        /* Визначення */
+        .definition-box {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(236, 72, 153, 0.2));
+            border: 2px solid var(--primary);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .definition-box::before {
+            content: '💡';
+            position: absolute;
+            top: -20px;
+            left: 30px;
+            font-size: 2em;
+            background: var(--dark);
+            padding: 0 10px;
+        }
+        
+        .definition-box p {
+            font-size: 1.3em;
+            line-height: 1.8;
+            color: #fff;
+        }
+        
+        /* Приклади застосування */
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .example-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .example-card:hover {
+            transform: scale(1.05);
+            border-color: var(--accent);
+        }
+        
+        .example-card .icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        
+        /* Інструменти */
+        .tools-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .tool-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+        
+        .tool-card:hover {
+            border-color: var(--success);
+            transform: translateY(-5px);
+        }
+        
+        .tool-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .tool-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+        }
+        
+        .tool-name {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #fff;
+        }
+        
+        .tool-shortcut {
+            background: rgba(255,255,255,0.1);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            color: var(--accent);
+            font-family: monospace;
+        }
+        
+        .tool-description {
+            color: rgba(255,255,255,0.8);
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .tool-example {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.9em;
+            color: rgba(255,255,255,0.7);
+            border-left: 3px solid var(--success);
+        }
+        
+        /* Відео секція */
+        .video-container {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        .video-placeholder {
+            width: 100%;
+            max-width: 800px;
+            height: 450px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(236, 72, 153, 0.2));
+            border: 2px dashed var(--primary);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .video-placeholder:hover {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(236, 72, 153, 0.3));
+            transform: scale(1.02);
+        }
+        
+        .play-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+        
+        /* Практична робота */
+        .practice-container {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 30px;
+        }
+        
+        .step-list {
+            list-style: none;
+            margin-top: 25px;
+        }
+        
+        .step-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .step-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: var(--primary);
+            transform: translateX(10px);
+        }
+        
+        .step-item.completed {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--success);
+        }
+        
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        
+        .step-item.completed .step-number {
+            background: var(--success);
+            content: '✓';
+        }
+        
+        .step-content h4 {
+            margin-bottom: 8px;
+            color: #fff;
+        }
+        
+        .step-content p {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+        
+        .step-tip {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 3px solid var(--accent);
+            padding: 10px 15px;
+            margin-top: 10px;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.9em;
+            color: var(--accent);
+        }
+        
+        /* Рефлексія */
+        .reflection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .reflection-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .reflection-card:hover {
+            border-color: var(--secondary);
+            transform: translateY(-5px);
+        }
+        
+        .reflection-question {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+        
+        .reflection-answer {
+            color: rgba(255,255,255,0.7);
+            line-height: 1.6;
+            display: none;
+        }
+        
+        .reflection-card.active .reflection-answer {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        /* Домашнє завдання */
+        .homework-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .homework-card {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .homework-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .homework-card:hover::before {
+            left: 100%;
+        }
+        
+        .homework-card:hover {
+            border-color: var(--secondary);
+            transform: translateY(-5px);
+        }
+        
+        .homework-card.selected {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+        
+        .homework-number {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 30px;
+            height: 30px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9em;
+        }
+        
+        /* Навігація по уроку */
+        .lesson-nav {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+        
+        .nav-btn {
+            padding: 15px 30px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-size: 1em;
+        }
+        
+        .nav-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        /* Photopea highlight */
+        .photopea-highlight {
+            background: linear-gradient(135deg, #2d4a3e, #1a3d2e);
+            border: 2px solid #4ade80;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .photopea-logo {
+            width: 80px;
+            height: 80px;
+            background: #4ade80;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5em;
+            font-weight: 800;
+            color: #0f172a;
+        }
+        
+        .photopea-info h3 {
+            color: #4ade80;
+            margin-bottom: 10px;
+        }
+        
+        .photopea-features {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        
+        .feature-tag {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        
+        /* Адаптивність */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.2em; }
+            h2 { font-size: 1.8em; }
+            section { padding: 80px 20px; }
+            nav { padding: 15px 20px; }
+            .progress-bar { width: 150px; }
+            .photopea-highlight { flex-direction: column; text-align: center; }
+        }
+        
+        /* Анімації */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Анімований фон -->
+    <div class="bg-animation" id="bgAnimation"></div>
+    
+    <!-- Навігація -->
+    <nav>
+        <div class="logo">🎨 Photopea Master</div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+    </nav>
+    
+    <!-- Секція 1: Вступ -->
+    <section id="section1" class="hero active">
+        <h1>Ретуш зображень</h1>
+        <p>Урок для 10 класу з онлайн-редактором Photopea. Навчимося перетворювати звичайні фото на професійні зображення!</p>
+        <button class="start-btn pulse" onclick="nextSection()">🚀 Почати урок</button>
+        
+        <div style="margin-top: 60px; display: flex; gap: 40px; justify-content: center; flex-wrap: wrap;">
+            <div style="text-align: center;">
+                <div style="font-size: 3em; margin-bottom: 10px;">📸</div>
+                <div>Ретуш портретів</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 3em; margin-bottom: 10px;">🎨</div>
+                <div>Корекція кольору</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 3em; margin-bottom: 10px;">✨</div>
+                <div>Видалення дефектів</div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Секція 2: Актуалізація знань -->
+    <section id="section2">
+        <h2>🤔 Запитання для роздумів</h2>
+        <p style="font-size: 1.2em; margin-bottom: 30px; color: rgba(255,255,255,0.8);">
+            Перш ніж почнемо, давайте подумаємо над цими запитаннями. Натисніть на картку, щоб побачити обговорення.
+        </p>
+        
+        <div class="questions-grid">
+            <div class="question-card" onclick="toggleQuestion(this)">
+                <div class="question-icon">📱</div>
+                <h4>Чому блогери виглядають "ідеально" на фото?</h4>
+                <p style="display: none; margin-top: 15px;">
+                    🔍 <strong>Обговорення:</strong> Професійне освітлення, правильний ракурс, а також ретуш — видалення дефектів, корекція кольору шкіри, відбілювання зубів. Це не завжди природна краса!
+                </p>
+            </div>
+            
+            <div class="question-card" onclick="toggleQuestion(this)">
+                <div class="question-icon">🤳</div>
+                <h4>Чи можна довіряти фото в соцмережах?</h4>
+                <p style="display: none; margin-top: 15px;">
+                    🔍 <strong>Обговорення:</strong> Не завжди. Фільтри, ретуш, AI-зміна обличчя — все це створює нереалістичні стандарти краси. Важливо розрізняти реальність та оброблені зображення.
+                </p>
+            </div>
+            
+            <div class="question-card" onclick="toggleQuestion(this)">
+                <div class="question-icon">⚖️</div>
+                <h4>Чи завжди обробка фото — це обман?</h4>
+                <p style="display: none; margin-top: 15px;">
+                    🔍 <strong>Обговорення:</strong> Ні! Ретуш використовується в журналістиці (покращення якості), медицині (чіткість знімків), мистецтві. Проблема виникає, коли змінюють реальність для обману.
+                </p>
+            </div>
+            
+            <div class="question-card" onclick="toggleQuestion(this)">
+                <div class="question-icon">💼</div>
+                <h4>Де ще використовується ретуш?</h4>
+                <p style="display: none; margin-top: 15px;">
+                    🔍 <strong>Обговорення:</strong> Реклама (продукти виглядають апетитніше), кіно (візуальні ефекти), документація (реставрація старих фото), наука (обробка знімків мікросвіту).
+                </p>
+            </div>
+            
+            <div class="question-card" onclick="toggleQuestion(this)">
+                <div class="question-icon">🎓</div>
+                <h4>Чи потрібно вчитися ретуші?</h4>
+                <p style="display: none; margin-top: 15px;">
+                    🔍 <strong>Обговорення:</strong> Так! Це корисна навичка для: створення презентацій, оформлення соцмереж, професій в дизайні/фотографії/маркетингу, розвитку креативного мислення.
+                </p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Секція 3: Що таке ретуш -->
+    <section id="section3">
+        <h2>📚 Що таке ретуш?</h2>
+        
+        <div class="definition-box">
+            <p>
+                <strong>Ретуш</strong> — це процес покращення зображення шляхом усунення дефектів, корекції кольору та деталей для досягнення бажаного візуального результату.
+            </p>
+        </div>
+        
+        <h3>Основні завдання ретуші:</h3>
+        <div class="examples-grid">
+            <div class="example-card">
+                <div class="icon">🔧</div>
+                <h4>Усунення дефектів</h4>
+                <p>Прищі, шрами, пил, подряпини на старих фото</p>
+            </div>
+            <div class="example-card">
+                <div class="icon">🎨</div>
+                <h4>Корекція кольору</h4>
+                <p>Яскравість, контраст, баланс білого, насиченість</p>
+            </div>
+            <div class="example-card">
+                <div class="icon">✂️</div>
+                <h4>Видалення об'єктів</h4>
+                <p>Зайві люди на тлі, провода, автомобілі</p>
+            </div>
+            <div class="example-card">
+                <div class="icon">💡</div>
+                <h4>Корекція освітлення</h4>
+                <p>Освітлення тіней, додавання світла, HDR-ефекти</p>
+            </div>
+        </div>
+        
+        <div style="margin-top: 40px; padding: 30px; background: rgba(236, 72, 153, 0.1); border-radius: 20px; border-left: 4px solid var(--secondary);">
+            <h4 style="color: var(--secondary); margin-bottom: 15px;">⚠️ Важливо: Етика ретуші</h4>
+            <p style="color: rgba(255,255,255,0.9); line-height: 1.8;">
+                • <strong>Покращення</strong> — усунення технічних недоліків (пил на об'єктиві, неправильна експозиція)<br>
+                • <strong>Маніпуляція</strong> — зміна реальності (зміна форми обличчя, додавання/видалення людей)<br>
+                • <strong>Обман</strong> — створення фейкових новин, підробка доказів<br><br>
+                <em>Завжди вказуйте, якщо фото було суттєво змінено!</em>
+            </p>
+        </div>
+    </section>
+    
+    <!-- Секція 4: Photopea -->
+    <section id="section4">
+        <h2>🛠️ Знайомство з Photopea</h2>
+        
+        <div class="photopea-highlight">
+            <div class="photopea-logo">P</div>
+            <div class="photopea-info">
+                <h3>Photopea — безкоштовний онлайн-редактор</h3>
+                <p style="color: rgba(255,255,255,0.8); line-height: 1.6;">
+                    Професійний інструмент, який працює прямо в браузері. Не потребує встановлення!
+                </p>
+                <div class="photopea-features">
+                    <span class="feature-tag">💻 Працює в браузері</span>
+                    <span class="feature-tag">📁 Підтримує PSD</span>
+                    <span class="feature-tag">🆓 Безкоштовно</span>
+                    <span class="feature-tag">🔧 Як Photoshop</span>
+                </div>
+            </div>
+        </div>
+        
+        <h3>Як відкрити Photopea:</h3>
+        <div class="practice-container">
+            <ol style="color: rgba(255,255,255,0.9); line-height: 2; margin-left: 20px;">
+                <li>Відкрийте браузер (Chrome, Firefox, Edge)</li>
+                <li>Перейдіть на сайт: <strong>www.photopea.com</strong></li>
+                <li>Натисніть <strong>File → Open</strong> або перетягніть фото</li>
+                <li>Починайте редагувати!</li>
+            </ol>
+            
+            <div style="margin-top: 25px; padding: 20px; background: rgba(99, 102, 241, 0.1); border-radius: 15px; border: 1px solid var(--primary);">
+                <strong>💡 Порада:</strong> Photopea зберігає файли у форматі PSD (Photoshop Document), тому ви можете відкрити їх пізніше в Photoshop або продовжити редагування онлайн.
+            </div>
+        </div>
+    </section>
+    
+    <!-- Секція 5: Інструменти ретуші -->
+    <section id="section5">
+        <h2>🔧 Інструменти ретуші</h2>
+        <p style="font-size: 1.1em; margin-bottom: 30px; color: rgba(255,255,255,0.8);">
+            Основний принцип: <strong>заміна дефектної ділянки на "здорову" текстуру</strong> з навколишньої області.
+        </p>
+        
+        <div class="tools-container">
+            <div class="tool-card">
+                <div class="tool-header">
+                    <div class="tool-icon">🔴</div>
+                    <div>
+                        <div class="tool-name">Spot Healing Brush</div>
+                        <span class="tool-shortcut">J</span>
+                    </div>
+                </div>
+                <p class="tool-description">
+                    <strong>Точкове відновлення.</strong> Автоматично аналізує навколишні пікселі та замінює дефект. Ідеально для прищів, плям, дрібних подряпин.
+                </p>
+                <div class="tool-example">
+                    💡 Просто намалюйте поверх прища — Photopea сам підбере текстуру!
+                </div>
+            </div>
+            
+            <div class="tool-card">
+                <div class="tool-header">
+                    <div class="tool-icon">🩹</div>
+                    <div>
+                        <div class="tool-name">Healing Brush</div>
+                        <span class="tool-shortcut">J (з Alt)</span>
+                    </div>
+                </div>
+                <p class="tool-description">
+                    <strong>Відновлювальний пензель.</strong> Ви самі обираєте джерело текстури (Alt+клік), потім малюєте поверх дефекту. Більше контролю, ніж Spot Healing.
+                </p>
+                <div class="tool-example">
+                    💡 Корисно для великих ділянок, де важливо зберегти текстуру шкіри.
+                </div>
+            </div>
+            
+            <div class="tool-card">
+                <div class="tool-header">
+                    <div class="tool-icon">🖨️</div>
+                    <div>
+                        <div class="tool-name">Clone Stamp</div>
+                        <span class="tool-shortcut">S</span>
+                    </div>
+                </div>
+                <p class="tool-description">
+                    <strong>Штамп.</strong> Повністю копіює пікселі з одного місця в інше. Не змішує кольори — ідеально для видалення об'єктів, клонування деталей.
+                </p>
+                <div class="tool-example">
+                    💡 Alt+клік — вибрати джерело, потім малювати. Регулюйте Opacity для плавності.
+                </div>
+            </div>
+            
+            <div class="tool-card">
+                <div class="tool-header">
+                    <div class="tool-icon">🩹</div>
+                    <div>
+                        <div class="tool-name">Patch Tool</div>
+                        <span class="tool-shortcut">J</span>
+                    </div>
+                </div>
+                <p class="tool-description">
+                    <strong>Латка.</strong> Виділяєте дефект, перетягуєте на "здорову" ділянку — Photopea замінює та автоматично підганяє кольори.
+                </p>
+                <div class="tool-example">
+                    💡 Найкраще для великих нерівностей шкіри або одягу.
+                </div>
+            </div>
+            
+            <div class="tool-card">
+                <div class="tool-header">
+                    <div class="tool-icon">💨</div>
+                    <div>
+                        <div class="tool-name">Blur Tool</div>
+                        <span class="tool-shortcut">-</span>
+                    </div>
+                </div>
+                <p class="tool-description">
+                    <strong>Розмиття.</strong> Згладжує різкі переходи, приховує дрібні дефекти. Часто використовується для змазування фону (bokeh ефект).
+                </p>
+                <div class="tool-example">
+                    💡 Використовуйте з обережністю — надмірне розмиття виглядає неприродно.
+                </div>
+            </div>
+            
+            <div class="tool-card">
+                <div class="tool-header">
+                    <div class="tool-icon">☀️</div>
+                    <div>
+                        <div class="tool-name">Dodge / Burn</div>
+                        <span class="tool-shortcut">O</span>
+                    </div>
+                </div>
+                <p class="tool-description">
+                    <strong>Освітлення / Затемнення.</strong> Dodge робить ділянки світлішими (очі, блиски), Burn — темнішими (тіні, контур обличчя).
+                </p>
+                <div class="tool-example">
+                    💡 Професійний прийом: освітліть вилиці та перенісся, затемніть щелепу — обличчя стане виразнішим.
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Секція 6: Демонстрація -->
+    <section id="section6">
+        <h2>🎥 Демонстрація технік</h2>
+        
+        <div class="video-container">
+            <h3>Відео: Ретуш портрету в Photopea</h3>
+            <div class="video-placeholder" onclick="openVideo()">
+                <div class="play-icon">▶️</div>
+                <p style="font-size: 1.2em; color: rgba(255,255,255,0.9);">Натисніть для відтворення</p>
+                <p style="color: rgba(255,255,255,0.6); margin-top: 10px;">YouTube: Photopea Portrait Retouching Tutorial</p>
+            </div>
+            
+            <div style="margin-top: 30px; text-align: left;">
+                <h4 style="margin-bottom: 15px; color: var(--accent);">🔍 Завдання під час перегляду:</h4>
+                <ul style="color: rgba(255,255,255,0.9); line-height: 2; margin-left: 20px;">
+                    <li>Визначте, які інструменти використовуються на кожному етапі</li>
+                    <li>Зверніть увагу на порядок дій: спочатку дефекти, потім колір</li>
+                    <li>Помітьте, як часто використовується копіювання шару</li>
+                    <li>Запишіть гарячі клавіші, які показують у відео</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div style="margin-top: 30px; padding: 25px; background: rgba(245, 158, 11, 0.1); border-radius: 15px; border-left: 4px solid var(--accent);">
+            <strong>⚡ Альтернатива відео:</strong> Якщо немає доступу до YouTube, вчитель може продемонструвати ретуш на власному прикладі в Photopea, коментуючи кожен крок.
+        </div>
+    </section>
+    
+    <!-- Секція 7: Практична робота -->
+    <section id="section7">
+        <h2>✏️ Практична робота</h2>
+        <h3>"Ретуш портретного фото"</h3>
+        
+        <div class="practice-container">
+            <p style="margin-bottom: 25px; color: rgba(255,255,255,0.9);">
+                Виконайте всі кроки послідовно. Натискайте на крок, щоб позначити як виконаний.
+            </p>
+            
+            <ol class="step-list">
+                <li class="step-item" onclick="toggleStep(this)">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Відкрити фото в Photopea</h4>
+                        <p>Перейдіть на photopea.com → File → Open → оберіть портретне фото (власне або з прикладів)</p>
+                        <div class="step-tip">💡 Порада: Вибирайте фото з хорошим освітленням, але з видимими дефектами (прищі, почервоніння)</div>
+                    </div>
+                </li>
+                
+                <li class="step-item" onclick="toggleStep(this)">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Створити копію шару</h4>
+                        <p>Layer → Duplicate Layer (Ctrl+J). Працюйте на копії, щоб зберегти оригінал!</p>
+                        <div class="step-tip">💡 Це золоте правило: завжди дублюйте шар перед ретушшю</div>
+                    </div>
+                </li>
+                
+                <li class="step-item" onclick="toggleStep(this)">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Видалити дефекти (прищі, плями)</h4>
+                        <p>Використайте <strong>Spot Healing Brush (J)</strong> — намалюйте поверх кожного прища. Для складних ділянок використайте <strong>Healing Brush</strong> з вибором джерела (Alt+клік)</p>
+                        <div class="step-tip">💡 Збільште зображення (Ctrl++) для точної роботи з дрібними деталями</div>
+                    </div>
+                </li>
+                
+                <li class="step-item" onclick="toggleStep(this)">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Вирівняти тон шкіри</h4>
+                        <p>Image → Adjustments → Levels (Ctrl+L) або Curves (Ctrl+M). Підберіть баланс, щоб шкіра виглядала природно.</p>
+                        <div class="step-tip">💡 Не переборщіть! Шкіра має залишатися текстурною, не пластиковою</div>
+                    </div>
+                </li>
+                
+                <li class="step-item" onclick="toggleStep(this)">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h4>Прибрати зайві об'єкти (опціонально)</h4>
+                        <p>Якщо на тлі є відволікаючі елементи (провода, люди), використайте <strong>Clone Stamp (S)</strong> або <strong>Patch Tool</strong></p>
+                        <div class="step-tip">💡 Для Clone Stamp: Alt+клік на "чистій" ділянці, потім малюйте поверх об'єкта</div>
+                    </div>
+                </li>
+                
+                <li class="step-item" onclick="toggleStep(this)">
+                    <div class="step-number">6</div>
+                    <div class="step-content">
+                        <h4>Фінальні штрихи</h4>
+                        <p>Додайте легке <strong>розмиття фону</strong> (Filter → Blur → Gaussian Blur на копії шару з маскою) або корекцію кольору (Image → Adjustments → Hue/Saturation)</p>
+                        <div class="step-tip">💡 Порівняйте з оригіналом (подивіться на шар Background) — чи не переборщили?</div>
+                    </div>
+                </li>
+                
+                <li class="step-item" onclick="toggleStep(this)">
+                    <div class="step-number">7</div>
+                    <div class="step-content">
+                        <h4>Зберегти результат</h4>
+                        <p>File → Export As → JPG (для соцмереж) або PNG (для максимальної якості). Або File → Save as PSD, щоб зберегти шари для подальшого редагування.</p>
+                        <div class="step-tip">💡 Для Instagram: квадратний формат 1080x1080 px, якість 90%</div>
+                    </div>
+                </li>
+            </ol>
+            
+            <div id="practiceProgress" style="margin-top: 30px; padding: 20px; background: rgba(16, 185, 129, 0.1); border-radius: 15px; display: none;">
+                <h4 style="color: var(--success);">🎉 Вітаємо! Ви виконали всі кроки!</h4>
+                <p style="color: rgba(255,255,255,0.9); margin-top: 10px;">Тепер ви можете порівняти "до" та "після", зберегти роботу та поділитися результатом.</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Секція 8: Рефлексія -->
+    <section id="section8">
+        <h2>🤔 Рефлексія</h2>
+        <p style="font-size: 1.2em; margin-bottom: 30px; color: rgba(255,255,255,0.8);">
+            Натисніть на запитання, щоб подумати над відповіддю.
+        </p>
+        
+        <div class="reflection-grid">
+            <div class="reflection-card" onclick="toggleReflection(this)">
+                <div class="reflection-question">❓ Що було найскладнішим у ретуші?</div>
+                <div class="reflection-answer">
+                    Можливі відповіді: підбір правильного інструменту, збереження природної текстури шкіри, робота з дрібними деталями, баланс між покращенням та перебором.
+                </div>
+            </div>
+            
+            <div class="reflection-card" onclick="toggleReflection(this)">
+                <div class="reflection-question">❓ Чи змінилось ваше ставлення до фото в соцмережах?</div>
+                <div class="reflection-answer">
+                    Обговорення: тепер ви знаєте, скільки роботи стоїть за "ідеальними" фото. Це навичка, а не магія. Важливо критично оцінювати зображення та не порівнювати себе з ретушованими фото.
+                </div>
+            </div>
+            
+            <div class="reflection-card" onclick="toggleReflection(this)">
+                <div class="reflection-question">❓ Де проходить межа між покращенням і обманом?</div>
+                <div class="reflection-answer">
+                    Тема для дискусії: усунення тимчасових дефектів (прищ) vs зміна рис обличчя; корекція кольору vs зміна фону документального фото; artistic editing vs fake news.
+                </div>
+            </div>
+            
+            <div class="reflection-card" onclick="toggleReflection(this)">
+                <div class="reflection-question">❓ Де ще можете застосувати ці навички?</div>
+                <div class="reflection-answer">
+                    Ідеї: оформлення презентацій, створення контенту для соцмереж, допомога батькам зі старими фото, підготовка портфоліо, участь у фотоконкурсах, майбутня професія (дизайнер, фотограф, маркетолог).
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Секція 9: Домашнє завдання -->
+    <section id="section9">
+        <h2>🏠 Домашнє завдання</h2>
+        <p style="font-size: 1.2em; margin-bottom: 30px; color: rgba(255,255,255,0.8);">
+            Оберіть одне із завдань (натисніть, щоб вибрати):
+        </p>
+        
+        <div class="homework-options">
+            <div class="homework-card" onclick="selectHomework(this)">
+                <div class="homework-number">1</div>
+                <h3 style="margin-bottom: 15px; color: var(--primary);">📸 Практичне</h3>
+                <p style="color: rgba(255,255,255,0.8); line-height: 1.6;">
+                    Відретушуйте власне портретне фото: видаліть дефекти, вирівняйте колір, застосуйте фільтр. Надішліть "до" та "після".
+                </p>
+            </div>
+            
+            <div class="homework-card" onclick="selectHomework(this)">
+                <div class="homework-number">2</div>
+                <h3 style="margin-bottom: 15px; color: var(--secondary);">🔍 Дослідницьке</h3>
+                <p style="color: rgba(255,255,255,0.8); line-height: 1.6;">
+                    Знайдіть 3 приклади "до/після" ретуші (реклама, журнали, соцмережі). Проаналізуйте, що саме змінено та навіщо.
+                </p>
+            </div>
+            
+            <div class="homework-card" onclick="selectHomework(this)">
+                <div class="homework-number">3</div>
+                <h3 style="margin-bottom: 15px; color: var(--accent);">✍️ Творче</h3>
+                <p style="color: rgba(255,255,255,0.8); line-height: 1.6;">
+                    Напишіть есе (200-300 слів): "Чи етично ретушувати фото? Межа між мистецтвом та обманом". Наведіть аргументи "за" та "проти".
+                </p>
+            </div>
+        </div>
+        
+        <div style="margin-top: 50px; text-align: center; padding: 40px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(236, 72, 153, 0.2)); border-radius: 30px;">
+            <h3 style="margin-bottom: 20px;">🎉 Урок завершено!</h3>
+            <p style="font-size: 1.2em; color: rgba(255,255,255,0.9);">
+                Ви навчилися основ ретуші зображень та познайомилися з професійним інструментом Photopea.<br>
+                <strong>Продовжуйте практикуватися — майстерність приходить з досвідом!</strong>
+            </p>
+            <button class="start-btn" onclick="restartLesson()" style="margin-top: 30px;">🔄 Пройти урок знову</button>
+        </div>
+    </section>
+    
+    <!-- Навігаційні кнопки -->
+    <div class="lesson-nav">
+        <button class="nav-btn" id="prevBtn" onclick="prevSection()">← Назад</button>
+        <button class="nav-btn" id="nextBtn" onclick="nextSection()">Далі →</button>
+    </div>
+    
+    <script>
+        // Глобальні змінні
+        let currentSection = 1;
+        const totalSections = 9;
+        
+        // Ініціалізація фону
+        function initBackground() {
+            const bg = document.getElementById('bgAnimation');
+            for (let i = 0; i < 15; i++) {
+                const span = document.createElement('span');
+                span.style.left = Math.random() * 100 + '%';
+                span.style.animationDelay = Math.random() * 20 + 's';
+                span.style.animationDuration = (15 + Math.random() * 10) + 's';
+                bg.appendChild(span);
+            }
+        }
+        
+        // Навігація
+        function updateProgress() {
+            const progress = ((currentSection - 1) / (totalSections - 1)) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            
+            document.getElementById('prevBtn').disabled = currentSection === 1;
+            document.getElementById('nextBtn').disabled = currentSection === totalSections;
+            
+            for (let i = 1; i <= totalSections; i++) {
+                const section = document.getElementById('section' + i);
+                if (i === currentSection) {
+                    section.classList.add('active');
+                } else {
+                    section.classList.remove('active');
+                }
+            }
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function nextSection() {
+            if (currentSection < totalSections) {
+                currentSection++;
+                updateProgress();
+            }
+        }
+        
+        function prevSection() {
+            if (currentSection > 1) {
+                currentSection--;
+                updateProgress();
+            }
+        }
+        
+        function restartLesson() {
+            currentSection = 1;
+            // Скидання станів
+            document.querySelectorAll('.question-card').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.step-item').forEach(s => s.classList.remove('completed'));
+            document.querySelectorAll('.homework-card').forEach(h => h.classList.remove('selected'));
+            document.getElementById('practiceProgress').style.display = 'none';
+            updateProgress();
+        }
+        
+        // Інтерактивні функції
+        function toggleQuestion(card) {
+            card.classList.toggle('active');
+            const answer = card.querySelector('p');
+            answer.style.display = answer.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function toggleStep(step) {
+            step.classList.toggle('completed');
+            const number = step.querySelector('.step-number');
+            if (step.classList.contains('completed')) {
+                number.textContent = '✓';
+            } else {
+                const steps = document.querySelectorAll('.step-item');
+                const index = Array.from(steps).indexOf(step) + 1;
+                number.textContent = index;
+            }
+            
+            // Перевірка чи всі кроки виконані
+            const allSteps = document.querySelectorAll('.step-item');
+            const completedSteps = document.querySelectorAll('.step-item.completed');
+            if (allSteps.length === completedSteps.length) {
+                document.getElementById('practiceProgress').style.display = 'block';
+            }
+        }
+        
+        function toggleReflection(card) {
+            card.classList.toggle('active');
+        }
+        
+        function selectHomework(card) {
+            document.querySelectorAll('.homework-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+        }
+        
+        function openVideo() {
+            window.open('https://www.youtube.com/results?search_query=photopea+portrait+retouching+tutorial', '_blank');
+        }
+        
+        // Ініціалізація
+        window.onload = function() {
+            initBackground();
+            updateProgress();
+        };
+        
+        // Клавіатурна навігація
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight') nextSection();
+            if (e.key === 'ArrowLeft') prevSection();
+        });
+    </script>
+</body>
+</html>
